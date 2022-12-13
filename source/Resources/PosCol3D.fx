@@ -1,28 +1,29 @@
 struct VS_INPUT
 {
-	Vector3 Position = POSITION;
-	Vector3 Color = COLOR;
+	float3 Position : POSITION;
+	float3 Color : COLOR;
 };
 
 struct VS_OUTPUT
 {
-	Vector4 Position = SV_POSITION;
-	Vector3 Color = COLOR;
+	float4 Position : SV_POSITION;
+	float3 Color : COLOR;
 };
 
-VS_OUTPUT VertexShader(VS_INPUT input)
+//Vertex Shder
+VS_OUTPUT VS(VS_INPUT input)
 {
-	VS_OUTPUT output = (VS_OUTPUT);
-	output.Position = Vector4(input.Position, 1);
+	VS_OUTPUT output = (VS_OUTPUT)0;
+	output.Position = float4(input.Position, 1);
 	output.Color = input.Color;
 	return output;
 }
 
-Vector4 Renderer::PixelShader(VS_OUTPUT input)
+//PixelShader
+float4 PS(VS_OUTPUT input) : SV_TARGET
 {
-	return Vector4(input.Color, 1);
+	return float4(input.Color, 1);
 }
-
 
 technique11 DefaultTechnique
 {

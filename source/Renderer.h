@@ -1,5 +1,6 @@
 #pragma once
 #include "Math.h"
+#include "Mesh.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -21,7 +22,7 @@ namespace dae
 
 		void Update(const Timer* pTimer);
 		void Render() const;
-
+		void InitMesh();
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -39,7 +40,7 @@ namespace dae
 		ID3D11DepthStencilView* m_pDepthStencilView;
 		ID3D11Resource* m_pRenderTargetBuffer;
 		ID3D11RenderTargetView* m_pRenderTargetView;
-
+		Mesh* m_pMesh;
 
 		HRESULT InitializeDirectX();
 		//...

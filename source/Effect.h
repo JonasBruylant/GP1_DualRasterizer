@@ -13,9 +13,11 @@ public:
 		if (!m_pTechnique->IsValid())
 			std::wcout << L"Technique not valid \n";
 	}
+
 	~Effect()
 	{
 		m_pTechnique->Release();
+
 		m_pEffect->Release();
 	}
 
@@ -66,7 +68,7 @@ public:
 				return nullptr;
 			}
 		}
-
+		pErrorBlob->Release();
 		return pEffect;
 	}
 private:

@@ -22,3 +22,14 @@
 // Framework Headers
 #include "Timer.h"
 #include "Math.h"
+
+
+namespace dae 
+{
+	//Structs
+	struct Vertex
+	{
+		Vector3 Position;
+		Vector3 Color;
+	};
+}

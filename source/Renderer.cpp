@@ -23,7 +23,7 @@ namespace dae {
 			std::cout << "DirectX initialization failed!\n";
 		}
 
-		
+		InitMesh();
 	}
 
 	Renderer::~Renderer()
@@ -34,6 +34,10 @@ namespace dae {
 			m_pDeviceContext->Flush();
 			m_pDeviceContext->Release();
 		}
+
+
+		delete m_pMesh;
+		m_pMesh = nullptr;
 
 		m_pRenderTargetView->Release();
 		m_pRenderTargetBuffer->Release();
@@ -62,27 +66,28 @@ namespace dae {
 
 		//2. SET PIPELINE + INVOKE DRAWCALLS (=RENDER)
 
-		//Create Vertex Layout
-		static constexpr uint32_t numElements{ 2 };
-		D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
-
-		vertexDesc[0].SemanticName = "POSITION";
-		vertexDesc[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		vertexDesc[0].AlignedByteOffset = 0;
-		vertexDesc[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-
-		vertexDesc[1].SemanticName = "COLOR";
-		vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		vertexDesc[1].AlignedByteOffset = 12;
-		vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-
-
+		m_pMesh->Render(m_pDeviceContext);
 
 		//3. PRESENT BACKBUFFER (SWAP)
 		m_pSwapChain->Present(0, 0);
 
 
 	}
+
+	void Renderer::InitMesh()
+	{
+		//Set up mesh data
+		std::vector<Vertex> vertices{
+			{{.0f, .5f, .5f},{1.f, .0f, .0f}},
+			{{.5f, -.5f, .5f},{.0f, .0f, 1.f}},
+			{{-.5f, -.5f, .5f},{.0f, 1.f, .0f}}
+		};
+
+		std::vector<uint32_t> indices{ 0,1,2 };
+
+		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+	}
+
 
 	HRESULT Renderer::InitializeDirectX()
 	{
@@ -127,13 +132,13 @@ namespace dae {
 		SDL_GetWindowWMInfo(m_pWindow, &sysWMInfo);
 		swapChainDesc.OutputWindow = sysWMInfo.info.win.window;
 
-		//Creaye SwapChain
+		//Create SwapChain
 		result = pDxgiFactory->CreateSwapChain(m_pDevice, &swapChainDesc, &m_pSwapChain);
 
 		if (FAILED(result))
 			return result;
 
-		//3. CReate DepthStencil (DS) & DepthStencilView (DSV)
+		//3. Create DepthStencil (DS) & DepthStencilView (DSV)
 
 		D3D11_TEXTURE2D_DESC depthStencilDesc{};
 		depthStencilDesc.Width = m_Width;
