@@ -12,6 +12,10 @@ public:
 		m_pTechnique = m_pEffect->GetTechniqueByName("DefaultTechnique");
 		if (!m_pTechnique->IsValid())
 			std::wcout << L"Technique not valid \n";
+
+		m_pMatWorldViewProjVariable = m_pEffect->GetVariableByName("gWorldViewProj")->AsMatrix();
+		if(!m_pMatWorldViewProjVariable->IsValid())
+			std::wcout << L"m_pMatWorldViewProjVariable not valid \n";
 	}
 
 	~Effect()
@@ -71,8 +75,11 @@ public:
 		pErrorBlob->Release();
 		return pEffect;
 	}
+
+	ID3DX11EffectMatrixVariable* GetWVPMatrix() { return m_pMatWorldViewProjVariable; }
 private:
 	ID3DX11Effect* m_pEffect;
 	ID3DX11EffectTechnique* m_pTechnique;
+	ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable;
 };
 

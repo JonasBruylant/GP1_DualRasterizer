@@ -6,6 +6,7 @@ namespace dae {
 	Renderer::Renderer(SDL_Window* pWindow) :
 		m_pWindow(pWindow)
 	{
+		m_AspectRatio = static_cast<float>(m_Width) / m_Height;
 		//Initialize
 		SDL_GetWindowSize(pWindow, &m_Width, &m_Height);
 
@@ -22,8 +23,9 @@ namespace dae {
 		{
 			std::cout << "DirectX initialization failed!\n";
 		}
-
+		
 		InitMesh();
+		InitCamera();
 	}
 
 	Renderer::~Renderer()
@@ -59,6 +61,11 @@ namespace dae {
 		if (!m_IsInitialized)
 			return;
 
+		m_Camera->CalculateViewMatrix();
+
+		float* something = static_cast<float*>(m_Camera->GetViewMatrix()[0][0] * m_Camera->GetProjectionMatrix()[0][0]);
+		m_pMesh->GetEffect()->GetWVPMatrix()->SetMatrix(something);
+
 		//1. CLEAR RTV & DSV
 		ColorRGB clearColor = {0.f, 0.f, 0.3f};
 		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, &clearColor.r);
@@ -86,6 +93,12 @@ namespace dae {
 		std::vector<uint32_t> indices{ 0,1,2 };
 
 		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+	}
+
+	void Renderer::InitCamera()
+	{
+		m_Camera = new Camera({ 0.f, 0.f, -10.f }, m_AspectRatio, 90);
+		m_Camera->CalculateProjectionMatrix();
 	}
 
 

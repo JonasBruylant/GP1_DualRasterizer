@@ -57,7 +57,7 @@ namespace dae
 			//Create index buffer 
 			m_NumIndices = static_cast<uint32_t>(indices.size());
 			bd.Usage = D3D11_USAGE_IMMUTABLE;
-			bd.ByteWidth = sizeof(uint32_t) * m_NumIndices;
+			bd.ByteWidth = UINT(sizeof(uint32_t) * m_NumIndices);
 			bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 			bd.CPUAccessFlags = 0;
 			bd.MiscFlags = 0;
@@ -102,10 +102,11 @@ namespace dae
 			for (UINT p = 0; p < techDesc.Passes; ++p)
 			{
 				m_pEffect->GetTechnique()->GetPassByIndex(p)->Apply(0, pDeviceContext);
-				pDeviceContext->DrawIndexed(m_NumIndices, UINT(0), INT(0));
+				pDeviceContext->DrawIndexed(UINT(m_NumIndices), UINT(0), INT(0));
 			}
 		}
 
+		Effect* GetEffect() { return m_pEffect; }
 	private:
 		ID3D11InputLayout* m_pInputLayout;
 		ID3D11Buffer* m_pVertexBuffer;

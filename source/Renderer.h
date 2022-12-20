@@ -1,6 +1,7 @@
 #pragma once
 #include "Math.h"
 #include "Mesh.h"
+#include "Camera.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -22,13 +23,16 @@ namespace dae
 
 		void Update(const Timer* pTimer);
 		void Render() const;
-		void InitMesh();
+		void InitMesh(); 
+		void InitCamera();
 
 	private:
 		SDL_Window* m_pWindow{};
 
 		int m_Width{};
 		int m_Height{};
+
+		float m_AspectRatio;
 
 		bool m_IsInitialized{ false };
 
@@ -41,6 +45,7 @@ namespace dae
 		ID3D11Resource* m_pRenderTargetBuffer;
 		ID3D11RenderTargetView* m_pRenderTargetView;
 		Mesh* m_pMesh;
+		Camera* m_Camera;
 
 		HRESULT InitializeDirectX();
 		//...

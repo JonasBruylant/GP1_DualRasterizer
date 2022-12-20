@@ -152,8 +152,19 @@ namespace dae {
 
 	Matrix Matrix::CreatePerspectiveFovLH(float fov, float aspect, float zn, float zf)
 	{
-		assert(false && "Not Implemented");
-		return {};
+
+		auto xScale = 1 / (fov * aspect);
+		auto yScale = 1 / fov;
+
+		//TODO W2
+		Matrix projectionMatrix{
+		   {xScale,     0,			  0,					0},
+		   {0,			yScale,       0,					0},
+		   {0,			0,			  zf / (zf - zn),		1},
+		   {0,			0,			  -zn * zf / (zf - zn),	0}
+		};
+
+		return projectionMatrix;
 	}
 
 	Vector3 Matrix::GetAxisX() const
