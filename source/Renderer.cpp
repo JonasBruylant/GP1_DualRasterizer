@@ -6,9 +6,9 @@ namespace dae {
 	Renderer::Renderer(SDL_Window* pWindow) :
 		m_pWindow(pWindow)
 	{
-		m_AspectRatio = static_cast<float>(m_Width) / m_Height;
 		//Initialize
 		SDL_GetWindowSize(pWindow, &m_Width, &m_Height);
+		m_AspectRatio = static_cast<float>(m_Width) / m_Height;
 
 		//Initialize DirectX pipeline
 		const HRESULT result = InitializeDirectX();
@@ -41,6 +41,9 @@ namespace dae {
 		delete m_pMesh;
 		m_pMesh = nullptr;
 
+		delete m_pCamera;
+		m_pCamera = nullptr;
+
 		m_pRenderTargetView->Release();
 		m_pRenderTargetBuffer->Release();
 		m_pDepthStencilView->Release();
@@ -61,10 +64,8 @@ namespace dae {
 		if (!m_IsInitialized)
 			return;
 
-		m_Camera->CalculateViewMatrix();
+		m_pCamera->CalculateViewMatrix();
 
-		float* something = static_cast<float*>(m_Camera->GetViewMatrix()[0][0] * m_Camera->GetProjectionMatrix()[0][0]);
-		m_pMesh->GetEffect()->GetWVPMatrix()->SetMatrix(something);
 
 		//1. CLEAR RTV & DSV
 		ColorRGB clearColor = {0.f, 0.f, 0.3f};
@@ -73,7 +74,8 @@ namespace dae {
 
 		//2. SET PIPELINE + INVOKE DRAWCALLS (=RENDER)
 
-		m_pMesh->Render(m_pDeviceContext);
+		auto worldViewProjectionMatix = m_pMesh->GetWorldMatrix() * m_pCamera->GetViewMatrix() * m_pCamera->GetProjectionMatrix();
+		m_pMesh->Render(m_pDeviceContext, worldViewProjectionMatix);
 
 		//3. PRESENT BACKBUFFER (SWAP)
 		m_pSwapChain->Present(0, 0);
@@ -97,8 +99,8 @@ namespace dae {
 
 	void Renderer::InitCamera()
 	{
-		m_Camera = new Camera({ 0.f, 0.f, -10.f }, m_AspectRatio, 90);
-		m_Camera->CalculateProjectionMatrix();
+		m_pCamera = new Camera({ 0.f, 0.f, -10.f }, m_AspectRatio, 45.f);
+		m_pCamera->CalculateProjectionMatrix();
 	}
 
 

@@ -79,8 +79,10 @@ namespace dae
 
 		}
 
-		void Render(ID3D11DeviceContext* pDeviceContext)
+		void Render(ID3D11DeviceContext* pDeviceContext, Matrix worldViewProjectionMatrix)
 		{
+			m_pEffect->SetMatrixData(worldViewProjectionMatrix);
+
 			//1. Set Primitive Topology
 			pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -106,12 +108,14 @@ namespace dae
 			}
 		}
 
-		Effect* GetEffect() { return m_pEffect; }
+		Effect* GetEffect() const { return m_pEffect; }
+		Matrix GetWorldMatrix() const { return m_WorldMatrix; }
 	private:
 		ID3D11InputLayout* m_pInputLayout;
 		ID3D11Buffer* m_pVertexBuffer;
 		ID3D11Buffer* m_pIndexBuffer;
 		size_t m_NumIndices;
 		Effect* m_pEffect;
+		Matrix m_WorldMatrix;
 	};
 }

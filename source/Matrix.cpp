@@ -161,7 +161,7 @@ namespace dae {
 		   {xScale,     0,			  0,					0},
 		   {0,			yScale,       0,					0},
 		   {0,			0,			  zf / (zf - zn),		1},
-		   {0,			0,			  -zn * zf / (zf - zn),	0}
+		   {0,			0,			    (- zn * zf) / (zf - zn),	0}
 		};
 
 		return projectionMatrix;

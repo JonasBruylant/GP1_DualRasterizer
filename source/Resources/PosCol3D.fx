@@ -12,12 +12,13 @@ struct VS_OUTPUT
 	float3 Color : COLOR;
 };
 
-//Vertex Shder
+//Vertex Shader
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
-	output.Position = float4(input.Position, 1);
-	output.Position *= gWorldviewProj;
+	//output.Position = float4(input.Position, 1);
+	//float4 input4 = float4(input.Position, 1);
+	output.Position = mul(float4(input.Position, 1), gWorldviewProj);
 	output.Color = input.Color;
 	return output;
 }
