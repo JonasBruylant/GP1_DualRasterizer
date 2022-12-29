@@ -47,6 +47,59 @@ namespace dae
 			projectionMatrix = Matrix::CreatePerspectiveFovLH(fov, camAspectRatio, nearPlane, farPlane);
 		}
 
+		void Update(const Timer* pTimer)
+		{
+			const float deltaTime = pTimer->GetElapsed();
+
+			//Camera Update Logic
+			//...
+			float movementSpeed{ 20.f };
+			float cameraSpeed{ 0.2f };
+
+			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
+			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_W] | pKeyboardState[SDL_SCANCODE_UP])) * forward * deltaTime * movementSpeed;
+			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_S] | pKeyboardState[SDL_SCANCODE_DOWN])) * -forward * deltaTime * movementSpeed;
+
+			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_A] | pKeyboardState[SDL_SCANCODE_LEFT])) * -right * deltaTime * movementSpeed;
+			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_D] | pKeyboardState[SDL_SCANCODE_RIGHT])) * right * deltaTime * movementSpeed;
+
+			int mouseX{}, mouseY{};
+			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
+
+			switch (mouseState)
+			{
+			case SDL_BUTTON_X2:
+			{
+				origin += up * static_cast<float>(mouseY) * deltaTime * movementSpeed;
+
+				break;
+			}
+			case SDL_BUTTON_LMASK:
+			{
+				origin += forward * static_cast<float>(mouseY) * deltaTime * movementSpeed;
+
+				totalYaw += mouseX * cameraSpeed;
+				Matrix rotation = Matrix::CreateRotation(totalPitch * TO_RADIANS, 0, 0);
+				forward = rotation.TransformVector(Vector3::UnitZ);
+				forward.Normalize();
+				break;
+			}
+			case SDL_BUTTON_RMASK:
+			{
+				totalYaw += mouseX * cameraSpeed;
+				totalPitch += -mouseY * cameraSpeed;
+				Matrix rotation = Matrix::CreateRotation(totalPitch * TO_RADIANS, totalYaw * TO_RADIANS, 0);
+				forward = rotation.TransformVector(Vector3::UnitZ);
+				forward.Normalize();
+				break;
+			}
+			}
+
+			//Update Matrices
+			CalculateViewMatrix();
+			void CalculateProjectionMatrix(); //Try to optimize this - should only be called once or when fov/aspectRatio changes
+		}
+
 	private:
 
 		Vector3 origin{};

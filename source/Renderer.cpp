@@ -24,6 +24,7 @@ namespace dae {
 			std::cout << "DirectX initialization failed!\n";
 		}
 		
+		InitTexture();
 		InitMesh();
 		InitCamera();
 	}
@@ -44,6 +45,9 @@ namespace dae {
 		delete m_pCamera;
 		m_pCamera = nullptr;
 
+		delete m_pTexture;
+		m_pTexture = nullptr;
+
 		m_pRenderTargetView->Release();
 		m_pRenderTargetBuffer->Release();
 		m_pDepthStencilView->Release();
@@ -55,7 +59,7 @@ namespace dae {
 
 	void Renderer::Update(const Timer* pTimer)
 	{
-
+		m_pCamera->Update(pTimer);
 	}
 
 
@@ -87,14 +91,18 @@ namespace dae {
 	{
 		//Set up mesh data
 		std::vector<Vertex> vertices{
-			{{.0f, .5f, .5f},{1.f, .0f, .0f}},
-			{{.5f, -.5f, .5f},{.0f, .0f, 1.f}},
-			{{-.5f, -.5f, .5f},{.0f, 1.f, .0f}}
+			{{.0f, .0f, 2.f},{1.f, .0f, .0f}, {0, 0}},
+			{{.0f, 4.f, 2.f},{.0f, .0f, 1.f}, {0, 1}},
+			{{4.f, .0f,2.f},{.0f, 1.f, .0f}, {1, 0}},
+			{{4.f, 4.f,2.f},{.0f, 1.f, .0f}, {1, 1}}
 		};
 
-		std::vector<uint32_t> indices{ 0,1,2 };
+		std::vector<uint32_t> indices{ 0,1,2,2,1,3 };
 
 		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+
+		if (m_pTexture != nullptr)
+			m_pMesh->GetEffect()->SetDiffuseMap(m_pTexture);
 	}
 
 	void Renderer::InitCamera()
@@ -103,6 +111,10 @@ namespace dae {
 		m_pCamera->CalculateProjectionMatrix();
 	}
 
+	void Renderer::InitTexture()
+	{
+		m_pTexture = Texture::LoadFromFile("Resources/uv_grid_2.png", m_pDevice);
+	}
 
 	HRESULT Renderer::InitializeDirectX()
 	{

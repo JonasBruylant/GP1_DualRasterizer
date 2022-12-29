@@ -25,6 +25,8 @@ namespace dae
 		void Render() const;
 		void InitMesh(); 
 		void InitCamera();
+		void InitTexture();
+
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -46,6 +48,7 @@ namespace dae
 		ID3D11RenderTargetView* m_pRenderTargetView;
 		Mesh* m_pMesh;
 		Camera* m_pCamera;
+		Texture* m_pTexture{ nullptr };
 
 		HRESULT InitializeDirectX();
 		//...

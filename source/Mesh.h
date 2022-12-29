@@ -15,7 +15,7 @@ namespace dae
 			m_pEffect = new Effect(pDevice, L"Resources/PosCol3D.fx");
 
 			//Create Vertex Layout
-			static constexpr uint32_t numElements{ 2 };
+			static constexpr uint32_t numElements{ 3 };
 			D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
 
 			vertexDesc[0].SemanticName = "POSITION";
@@ -27,6 +27,11 @@ namespace dae
 			vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 			vertexDesc[1].AlignedByteOffset = 12;
 			vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+			vertexDesc[2].SemanticName = "TEXCOORD";
+			vertexDesc[2].Format = DXGI_FORMAT_R32G32_FLOAT;
+			vertexDesc[2].AlignedByteOffset = 24;
+			vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 			//Create input Layout
 			D3DX11_PASS_DESC passDesc{};
@@ -72,11 +77,19 @@ namespace dae
 
 			delete m_pEffect;
 			m_pEffect = nullptr;
-			m_pIndexBuffer->Release();
-			m_pVertexBuffer->Release();
-			m_pInputLayout->Release();
+			if (m_pIndexBuffer != nullptr)
+			{
+				m_pIndexBuffer->Release();
+			}
 
-
+			if (m_pVertexBuffer != nullptr)
+			{
+				m_pVertexBuffer->Release();
+			}
+			if (m_pInputLayout != nullptr)
+			{
+				m_pInputLayout->Release();
+			}
 		}
 
 		void Render(ID3D11DeviceContext* pDeviceContext, Matrix worldViewProjectionMatrix)
