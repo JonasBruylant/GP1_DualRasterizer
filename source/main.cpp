@@ -58,6 +58,9 @@ int main(int argc, char* args[])
 			case SDL_KEYUP:
 				//Test for a key
 				//if (e.key.keysym.scancode == SDL_SCANCODE_X)
+				if (e.key.keysym.scancode == SDL_SCANCODE_F2)
+					pRenderer->SwitchTechnique();
+				
 				break;
 			default: ;
 			}

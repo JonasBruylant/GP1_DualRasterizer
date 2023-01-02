@@ -6,16 +6,34 @@
 namespace dae
 {
 
+
 	class Effect
 	{
 	public:
+		enum class currentTechnique
+		{
+			Point, //0
+			Linear, //1
+			Anisotropic, //2
+
+			END
+		};
+
 		Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 		{
 			m_pEffect = LoadEffect(pDevice, assetFile);
 
-			m_pTechnique = m_pEffect->GetTechniqueByName("DefaultTechnique");
-			if (!m_pTechnique->IsValid())
-				std::wcout << L"Technique not valid \n";
+			m_pPointTechnique = m_pEffect->GetTechniqueByName("PointTechnique");
+			if (!m_pPointTechnique->IsValid())
+				std::wcout << L"PointTechnique not valid \n";
+
+			m_pLinearTechnique = m_pEffect->GetTechniqueByName("LinearTechnique");
+			if (!m_pLinearTechnique->IsValid())
+				std::wcout << L"LinearTechnique not valid \n";
+
+			m_pAnisotropicTechnique = m_pEffect->GetTechniqueByName("AnisotropicTechnique");
+			if (!m_pAnisotropicTechnique->IsValid())
+				std::wcout << L"AnisotropicTechnique not valid \n";
 
 			m_pMatWorldViewProjVariable = m_pEffect->GetVariableByName("gWorldviewProj")->AsMatrix();
 			if(!m_pMatWorldViewProjVariable->IsValid())
@@ -30,12 +48,42 @@ namespace dae
 		{
 			m_pDiffuseMapVariable->Release();
 			m_pMatWorldViewProjVariable->Release();
-			m_pTechnique->Release();
+			m_pPointTechnique->Release();
+			m_pLinearTechnique->Release();
+			m_pAnisotropicTechnique->Release();
 			m_pEffect->Release();
 
 		}
 
-		ID3DX11EffectTechnique* GetTechnique() { return m_pTechnique; }
+		ID3DX11EffectTechnique* GetTechnique() 
+		{ 
+			switch (m_CurrentTechnique)
+			{
+			case dae::Effect::currentTechnique::Point:
+				return m_pPointTechnique;
+			case dae::Effect::currentTechnique::Linear:
+				return m_pLinearTechnique;
+			case dae::Effect::currentTechnique::Anisotropic:
+				return m_pAnisotropicTechnique;
+			}
+		}
+
+		void SwitchCurrentTechnique()
+		{	
+			m_CurrentTechnique = static_cast<currentTechnique>((static_cast<int>(m_CurrentTechnique) + 1) % static_cast<int>(currentTechnique::END)); 
+			switch (m_CurrentTechnique)
+			{
+			case dae::Effect::currentTechnique::Point:
+				std::cout << "Current Technique: PointTechnique \n";
+				break;
+			case dae::Effect::currentTechnique::Linear:
+				std::cout << "Current Technique: LinearTechnique \n";
+				break;
+			case dae::Effect::currentTechnique::Anisotropic:
+				std::cout << "Current Technique: AnisotropicTechnique \n";
+				break;
+			}
+		}
 		ID3DX11Effect* GetEffect() { return m_pEffect; }
 		ID3DX11EffectMatrixVariable* GetWVPMatrix() { return m_pMatWorldViewProjVariable; }
 		void SetMatrixData(Matrix worldViewProjectionMatrix) { m_pMatWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&worldViewProjectionMatrix)); }
@@ -92,7 +140,10 @@ namespace dae
 
 	private:
 		ID3DX11Effect* m_pEffect;
-		ID3DX11EffectTechnique* m_pTechnique;
+		ID3DX11EffectTechnique* m_pPointTechnique;
+		ID3DX11EffectTechnique* m_pLinearTechnique;
+		ID3DX11EffectTechnique* m_pAnisotropicTechnique;
+		currentTechnique m_CurrentTechnique;
 		ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable;
 		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVariable;
 	};

@@ -4,6 +4,15 @@
 
 namespace dae
 {
+	//Structs
+	struct Vertex
+	{
+		Vector3 Position;
+		Vector3 Color;
+		Vector2 Uv;
+		Vector3 Normal;
+		Vector3 Tangent;
+	};
 
 	class Mesh
 	{
@@ -13,6 +22,8 @@ namespace dae
 		Mesh(ID3D11Device* pDevice, std::vector<Vertex> vertices, std::vector<uint32_t> indices) : m_NumIndices{indices.size()}
 		{
 			m_pEffect = new Effect(pDevice, L"Resources/PosCol3D.fx");
+
+
 
 			//Create Vertex Layout
 			static constexpr uint32_t numElements{ 3 };
@@ -121,8 +132,14 @@ namespace dae
 			}
 		}
 
+		void RotateMesh(float rotationSpeed)
+		{
+			m_WorldMatrix = Matrix::CreateRotationY(rotationSpeed) * m_WorldMatrix;
+		}
+
 		Effect* GetEffect() const { return m_pEffect; }
 		Matrix GetWorldMatrix() const { return m_WorldMatrix; }
+		void SetWorldMatrix(Matrix wMatrix) { m_WorldMatrix = wMatrix; }
 	private:
 		ID3D11InputLayout* m_pInputLayout;
 		ID3D11Buffer* m_pVertexBuffer;

@@ -2,6 +2,7 @@
 #include "Math.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "Utils.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -26,6 +27,7 @@ namespace dae
 		void InitMesh(); 
 		void InitCamera();
 		void InitTexture();
+		void SwitchTechnique();
 
 
 	private:

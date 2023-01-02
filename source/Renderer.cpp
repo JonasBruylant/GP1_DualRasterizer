@@ -24,9 +24,9 @@ namespace dae {
 			std::cout << "DirectX initialization failed!\n";
 		}
 		
+		InitCamera();
 		InitTexture();
 		InitMesh();
-		InitCamera();
 	}
 
 	Renderer::~Renderer()
@@ -60,6 +60,14 @@ namespace dae {
 	void Renderer::Update(const Timer* pTimer)
 	{
 		m_pCamera->Update(pTimer);
+
+		const float meshRotation{ 45.0f * pTimer->GetElapsed() * TO_RADIANS };
+		m_pMesh->RotateMesh(meshRotation);
+
+		//for (auto& mesh : m_pMeshes)
+		//{
+		//	mesh->RotateMesh(meshRotation);
+		//}
 	}
 
 
@@ -90,16 +98,19 @@ namespace dae {
 	void Renderer::InitMesh()
 	{
 		//Set up mesh data
-		std::vector<Vertex> vertices{
-			{{.0f, .0f, 2.f},{1.f, .0f, .0f}, {0, 0}},
-			{{.0f, 4.f, 2.f},{.0f, .0f, 1.f}, {0, 1}},
-			{{4.f, .0f,2.f},{.0f, 1.f, .0f}, {1, 0}},
-			{{4.f, 4.f,2.f},{.0f, 1.f, .0f}, {1, 1}}
-		};
+		std::vector<Vertex> vertices{};
+		
+		std::vector<uint32_t> indices{};
+		
 
-		std::vector<uint32_t> indices{ 0,1,2,2,1,3 };
-
+		Utils::ParseOBJ("Resources/vehicle.obj", vertices, indices);
 		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+		const Vector3 position{ m_pCamera->GetOrigin() + Vector3{0, 0, 50}};
+		const Vector3 rotation{ };
+		const Vector3 scale{ Vector3{ 1, 1, 1 } };
+		//Matrix worldMatrix{position, rotation, scale};
+
+		m_pMesh->SetWorldMatrix(Matrix::CreateScale(scale) * Matrix::CreateRotation(rotation) * Matrix::CreateTranslation(position));
 
 		if (m_pTexture != nullptr)
 			m_pMesh->GetEffect()->SetDiffuseMap(m_pTexture);
@@ -113,8 +124,14 @@ namespace dae {
 
 	void Renderer::InitTexture()
 	{
-		m_pTexture = Texture::LoadFromFile("Resources/uv_grid_2.png", m_pDevice);
+		m_pTexture = Texture::LoadFromFile("Resources/vehicle_diffuse.png", m_pDevice);
 	}
+
+	void Renderer::SwitchTechnique()
+	{
+		m_pMesh->GetEffect()->SwitchCurrentTechnique();
+	}
+
 
 	HRESULT Renderer::InitializeDirectX()
 	{
