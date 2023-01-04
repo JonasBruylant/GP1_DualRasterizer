@@ -48,6 +48,15 @@ namespace dae {
 		delete m_pTexture;
 		m_pTexture = nullptr;
 
+		delete m_pNormalTexture;
+		m_pNormalTexture = nullptr;
+
+		delete m_pGlossinessTexture;
+		m_pGlossinessTexture = nullptr;
+
+		delete m_pSpecularTexture;
+		m_pSpecularTexture = nullptr;
+
 		m_pRenderTargetView->Release();
 		m_pRenderTargetBuffer->Release();
 		m_pDepthStencilView->Release();
@@ -87,7 +96,7 @@ namespace dae {
 		//2. SET PIPELINE + INVOKE DRAWCALLS (=RENDER)
 
 		auto worldViewProjectionMatix = m_pMesh->GetWorldMatrix() * m_pCamera->GetViewMatrix() * m_pCamera->GetProjectionMatrix();
-		m_pMesh->Render(m_pDeviceContext, worldViewProjectionMatix);
+		m_pMesh->Render(m_pDeviceContext, worldViewProjectionMatix, m_pCamera->GetInvViewMatrix());
 
 		//3. PRESENT BACKBUFFER (SWAP)
 		m_pSwapChain->Present(0, 0);
@@ -114,6 +123,15 @@ namespace dae {
 
 		if (m_pTexture != nullptr)
 			m_pMesh->GetEffect()->SetDiffuseMap(m_pTexture);
+
+		if (m_pNormalTexture != nullptr)
+			m_pMesh->GetEffect()->SetNormalMap(m_pNormalTexture);
+
+		if (m_pGlossinessTexture != nullptr)
+			m_pMesh->GetEffect()->SetGlossinessMap(m_pGlossinessTexture);
+
+		if (m_pSpecularTexture != nullptr)
+			m_pMesh->GetEffect()->SetSpecularMap(m_pSpecularTexture);
 	}
 
 	void Renderer::InitCamera()
@@ -125,6 +143,9 @@ namespace dae {
 	void Renderer::InitTexture()
 	{
 		m_pTexture = Texture::LoadFromFile("Resources/vehicle_diffuse.png", m_pDevice);
+		m_pNormalTexture = Texture::LoadFromFile("Resources/vehicle_normal.png", m_pDevice);
+		m_pGlossinessTexture = Texture::LoadFromFile("Resources/vehicle_gloss.png", m_pDevice);
+		m_pSpecularTexture = Texture::LoadFromFile("Resources/vehicle_specular.png", m_pDevice);
 	}
 
 	void Renderer::SwitchTechnique()

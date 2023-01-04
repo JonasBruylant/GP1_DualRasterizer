@@ -48,9 +48,16 @@ namespace dae
 		ID3D11DepthStencilView* m_pDepthStencilView;
 		ID3D11Resource* m_pRenderTargetBuffer;
 		ID3D11RenderTargetView* m_pRenderTargetView;
+
+		//Objects
 		Mesh* m_pMesh;
 		Camera* m_pCamera;
+
+		//Textures
 		Texture* m_pTexture{ nullptr };
+		Texture* m_pNormalTexture{ nullptr };
+		Texture* m_pGlossinessTexture{ nullptr };
+		Texture* m_pSpecularTexture{ nullptr };
 
 		HRESULT InitializeDirectX();
 		//...

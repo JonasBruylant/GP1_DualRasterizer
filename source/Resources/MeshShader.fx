@@ -11,7 +11,7 @@ Texture2D gSpecularMap : SpecularMap;
 Texture2D gGlossinessMap : GlossinessMap;
 
 //Light
-float3 gLightdirection : LightDirection;
+float3 gLightdirection = normalize(float3(0.577f, -0.577f, 0.577f));
 
 //Extra Data
 float gPi = 3.14159265359f;
@@ -48,8 +48,9 @@ struct VS_INPUT
 	float3 Color : COLOR;
 	float2 TexCoord : TEXCOORD;
 	float3 Normal : NORMAL;
-	float3 Tangent : TANGENT
+	float3 Tangent : TANGENT;
 };
+
 //Vertex Output
 struct VS_OUTPUT
 {
@@ -58,7 +59,7 @@ struct VS_OUTPUT
 	float3 Color : COLOR;
 	float2 TexCoord : TEXCOORD;
 	float3 Normal : NORMAL;
-	float3 Tangent : TANGENT
+	float3 Tangent : TANGENT;
 };
 
 //Vertex Shader
@@ -68,6 +69,9 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.Position = mul(float4(input.Position, 1), gWorldviewProj);
 	output.Color = input.Color;
 	output.TexCoord = input.TexCoord;
+	output.Normal = mul(normalize(input.Normal), (float3x3)gWorldMatrix);
+	output.Tangent = mul(normalize(input.Tangent), (float3x3)gWorldMatrix);
+	output.WorldPosition = mul(float4(input.Position, 1), gWorldMatrix);
 	return output;
 }
 
@@ -77,14 +81,14 @@ float4 Lambert(float kd, const float4 ColorRGB)
 	return (kd * ColorRGB) / gPi;
 }
 
-float4 Phong(float ks, float exp, float3 light, float3 position, float3 normal)
+float4 Phong(float ks, float exp, float3 light, float3 viewDirection, float3 normal)
 {
-	float3 reflect = reflect(light, normal);
+	float3 reflected = reflect(light, normal);
 
-	float angle = saturate(-1.f, 1.f);
+	float angle = saturate(dot(reflected, viewDirection));
 
 	float specularReflection = ks * pow(angle, exp);
-	float4 Color{ specularReflection ,specularReflection ,specularReflection , 1 };
+	float4 Color = float4( specularReflection ,specularReflection ,specularReflection , 1 );
 
 	return Color;
 }
@@ -94,27 +98,35 @@ float4 Phong(float ks, float exp, float3 light, float3 position, float3 normal)
 float4 Sampler(VS_OUTPUT input, SamplerState sampleVar)
 {
 
-	float3 pixelNormal{ input.Normal };
+	float3 pixelNormal = input.Normal ;
 	//Normal calculations
 
-	float3 viewDirection = normalize(input.WorldPosition.xyz - gInvViewMatrix[3].xyz);
 	float3 binormal = cross(input.Normal, input.Tangent);
-	float4x4 tangentSpaceAxis = float4x4(float4(input.tangent, 0.0f), float4(binormal, 0.f), float4(input.normal, 0.f), float4(0.f, 0.f, 0.f, 0.f));
-	auto sampledNormal{ gNormalMap.Sample(sampleVar, input.TexCoord)}; //??
-	sampledNormal = (2.f * sampledNormal) - float4{ 1.f, 1.f, 1.f }; // [0, 1] -> [-1, 1]
-	float3 sampledNormalVector{ sampledNormal.r, sampledNormal.g, sampledNormal.b };
-	pixelNormal = tangentSpaceAxis.TransformVector(sampledNormalVector);
+
+	float4x4 tangentSpaceAxis = float4x4(
+		float4(input.Tangent, 0.0f), 
+		float4(binormal, 0.f), 
+		float4(input.Normal, 0.f), 
+		float4(0.f, 0.f, 0.f, 1.f)
+		);
 
 
-	float observedArea = saturate(dot(-gLightdirection, pixelNormal), 0.f);
+	float3 sampledNormal = gNormalMap.Sample(sampleVar, input.TexCoord).rgb; 
+	sampledNormal = (2.f * sampledNormal) - float3( 1.f, 1.f, 1.f); // [0, 1] -> [-1, 1]
+	float3 sampledNormalVector = float3( sampledNormal.r, sampledNormal.g, sampledNormal.b);
+	pixelNormal = mul(float4(sampledNormalVector, 0), tangentSpaceAxis);
 
-	const float4 lambert{ Lambert(1, gDiffuseMap.Sample(sampleVar, input.TexCoord)) };
-	const float phongExponent{ gGlossinessMap.Sample(sampleVar, input.TexCoord) * gShininess};
 
-	const float4 specular{gSpecularMap.Sample(sampleVar,input.TexCoord) * Phong(1.0f, phongExponent, -gLightdirection, viewDirection, pixelNormal) };
+	float observedArea = saturate(dot(-gLightdirection, pixelNormal));
+	float3 viewDirection = normalize(input.WorldPosition.xyz - gInvViewMatrix[3].xyz);
 
-	return (lightIntensity * lambert + specular) * observedArea;
-	// return gDiffuseMap.Sample(sampleVar, input.TexCoord);
+	const float4 lambert = Lambert(1, gDiffuseMap.Sample(sampleVar, input.TexCoord)) ;
+	const float phongExponent = gGlossinessMap.Sample(sampleVar, input.TexCoord) * gShininess;
+
+	const float4 specular = gSpecularMap.Sample(sampleVar,input.TexCoord) * Phong(1.0f, phongExponent, -gLightdirection, viewDirection, pixelNormal);
+
+	return (gLightIntensity * lambert + specular) * observedArea;
+
 }
 
 float4 PSPoint(VS_OUTPUT input) : SV_TARGET

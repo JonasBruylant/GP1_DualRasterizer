@@ -21,12 +21,12 @@ namespace dae
 
 		Mesh(ID3D11Device* pDevice, std::vector<Vertex> vertices, std::vector<uint32_t> indices) : m_NumIndices{indices.size()}
 		{
-			m_pEffect = new Effect(pDevice, L"Resources/PosCol3D.fx");
+			m_pEffect = new Effect(pDevice, L"Resources/MeshShader.fx");
 
 
 
 			//Create Vertex Layout
-			static constexpr uint32_t numElements{ 3 };
+			static constexpr uint32_t numElements{ 5 };
 			D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
 
 			vertexDesc[0].SemanticName = "POSITION";
@@ -36,13 +36,23 @@ namespace dae
 
 			vertexDesc[1].SemanticName = "COLOR";
 			vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-			vertexDesc[1].AlignedByteOffset = 12;
+			vertexDesc[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 			vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 			vertexDesc[2].SemanticName = "TEXCOORD";
 			vertexDesc[2].Format = DXGI_FORMAT_R32G32_FLOAT;
-			vertexDesc[2].AlignedByteOffset = 24;
+			vertexDesc[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 			vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+			vertexDesc[3].SemanticName = "NORMAL";
+			vertexDesc[3].Format = DXGI_FORMAT_R32G32_FLOAT;
+			vertexDesc[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+			vertexDesc[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+			vertexDesc[4].SemanticName = "TANGENT";
+			vertexDesc[4].Format = DXGI_FORMAT_R32G32_FLOAT;
+			vertexDesc[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+			vertexDesc[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 			//Create input Layout
 			D3DX11_PASS_DESC passDesc{};
@@ -103,9 +113,12 @@ namespace dae
 			}
 		}
 
-		void Render(ID3D11DeviceContext* pDeviceContext, Matrix worldViewProjectionMatrix)
+		void Render(ID3D11DeviceContext* pDeviceContext, Matrix worldViewProjectionMatrix, Matrix invViewMatrix)
 		{
-			m_pEffect->SetMatrixData(worldViewProjectionMatrix);
+			m_pEffect->SetWorldViewProjMatrixData(worldViewProjectionMatrix);
+			m_pEffect->SetWorldMatrixData(m_WorldMatrix);
+			m_pEffect->SetInvViewMatrixData(invViewMatrix);
+
 
 			//1. Set Primitive Topology
 			pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

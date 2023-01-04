@@ -21,6 +21,7 @@ namespace dae
 		Matrix GetViewMatrix() { return viewMatrix; }
 		Matrix GetProjectionMatrix() { return projectionMatrix; }
 		Vector3 GetOrigin() { return origin; }
+		Matrix GetInvViewMatrix() { return invViewMatrix; }
 		
 		void CalculateViewMatrix()
 		{

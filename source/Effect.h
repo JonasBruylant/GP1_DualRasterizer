@@ -23,6 +23,7 @@ namespace dae
 		{
 			m_pEffect = LoadEffect(pDevice, assetFile);
 
+			//Load in techniques
 			m_pPointTechnique = m_pEffect->GetTechniqueByName("PointTechnique");
 			if (!m_pPointTechnique->IsValid())
 				std::wcout << L"PointTechnique not valid \n";
@@ -35,17 +36,54 @@ namespace dae
 			if (!m_pAnisotropicTechnique->IsValid())
 				std::wcout << L"AnisotropicTechnique not valid \n";
 
+
+
+			//Load in Matrix
 			m_pMatWorldViewProjVariable = m_pEffect->GetVariableByName("gWorldviewProj")->AsMatrix();
 			if(!m_pMatWorldViewProjVariable->IsValid())
 				std::wcout << L"m_pMatWorldViewProjVariable not valid \n";
 		
+
+			m_pWorldMatrixVariable = m_pEffect->GetVariableByName("gWorldMatrix")->AsMatrix();
+			if (!m_pMatWorldViewProjVariable->IsValid())
+				std::wcout << L"m_pWorldMatrixVariable not valid \n";
+
+
+			m_pInvViewMatrixVariable = m_pEffect->GetVariableByName("gInvViewMatrix")->AsMatrix();
+			if (!m_pMatWorldViewProjVariable->IsValid())
+				std::wcout << L"m_pInvViewMatrixVariable not valid \n";
+
+
+
+			//Load in Texture maps
 			m_pDiffuseMapVariable = m_pEffect->GetVariableByName("gDiffuseMap")->AsShaderResource();
 			if (!m_pDiffuseMapVariable->IsValid())
 				std::wcout << L"m_pDiffuseMapVariable is not valid \n";
+
+			m_pGlossinessMapVariable = m_pEffect->GetVariableByName("gGlossinessMap")->AsShaderResource();
+			if (!m_pDiffuseMapVariable->IsValid())
+				std::wcout << L"m_pGlossinessMapVariable is not valid \n";
+
+			m_pNormalMapVariable = m_pEffect->GetVariableByName("gNormalMap")->AsShaderResource();
+			if (!m_pDiffuseMapVariable->IsValid())
+				std::wcout << L"m_pNormalMapVariable is not valid \n";
+
+
+			m_pSpecularMapVariable = m_pEffect->GetVariableByName("gSpecularMap")->AsShaderResource();
+			if (!m_pDiffuseMapVariable->IsValid())
+				std::wcout << L"m_pSpecularMapVariable is not valid \n";
 		}
 
 		~Effect()
 		{
+
+			m_pGlossinessMapVariable->Release();
+			m_pSpecularMapVariable->Release();
+			m_pNormalMapVariable->Release();
+			m_pInvViewMatrixVariable->Release();
+			m_pWorldMatrixVariable->Release();
+
+
 			m_pDiffuseMapVariable->Release();
 			m_pMatWorldViewProjVariable->Release();
 			m_pPointTechnique->Release();
@@ -86,9 +124,17 @@ namespace dae
 		}
 		ID3DX11Effect* GetEffect() { return m_pEffect; }
 		ID3DX11EffectMatrixVariable* GetWVPMatrix() { return m_pMatWorldViewProjVariable; }
-		void SetMatrixData(Matrix worldViewProjectionMatrix) { m_pMatWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&worldViewProjectionMatrix)); }
-		void SetDiffuseMap(Texture* pDiffuseTexture) { if (m_pDiffuseMapVariable) 
-			m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetSRV()); }
+
+		void SetWorldViewProjMatrixData(Matrix worldViewProjectionMatrix) { m_pMatWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&worldViewProjectionMatrix)); }
+		void SetWorldMatrixData(Matrix worldMatrix) { m_pWorldMatrixVariable->SetMatrix(reinterpret_cast<const float*>(&worldMatrix)); }
+		void SetInvViewMatrixData(Matrix invViewMatrix) { m_pInvViewMatrixVariable->SetMatrix(reinterpret_cast<const float*>(&invViewMatrix)); }
+
+
+		void SetDiffuseMap(Texture* pDiffuseTexture) { if (m_pDiffuseMapVariable) m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetSRV()); }
+		void SetNormalMap(Texture* pNormalTexture) { if (m_pNormalMapVariable) m_pNormalMapVariable->SetResource(pNormalTexture->GetSRV()); }
+		void SetSpecularMap(Texture* pSpecularTexture) { if (m_pSpecularMapVariable) m_pSpecularMapVariable->SetResource(pSpecularTexture->GetSRV()); }
+		void SetGlossinessMap(Texture* pGlossinessTexture) { if (m_pGlossinessMapVariable) m_pGlossinessMapVariable->SetResource(pGlossinessTexture->GetSRV()); }
+
 
 		static ID3DX11Effect* LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile)
 		{
@@ -140,12 +186,21 @@ namespace dae
 
 	private:
 		ID3DX11Effect* m_pEffect;
+
 		ID3DX11EffectTechnique* m_pPointTechnique;
 		ID3DX11EffectTechnique* m_pLinearTechnique;
 		ID3DX11EffectTechnique* m_pAnisotropicTechnique;
+
 		currentTechnique m_CurrentTechnique;
+
 		ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable;
+		ID3DX11EffectMatrixVariable* m_pWorldMatrixVariable;
+		ID3DX11EffectMatrixVariable* m_pInvViewMatrixVariable;
+
 		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVariable;
+		ID3DX11EffectShaderResourceVariable* m_pNormalMapVariable;
+		ID3DX11EffectShaderResourceVariable* m_pSpecularMapVariable;
+		ID3DX11EffectShaderResourceVariable* m_pGlossinessMapVariable;
 	};
 }
 
