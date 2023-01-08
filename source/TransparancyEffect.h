@@ -2,11 +2,16 @@
 #include "pch.h"
 #include "Effect.h"
 
-
-class TransparancyEffect final : public Effect
+namespace dae 
 {
-public:
+	class TransparancyEffect final : public Effect
+	{
+	public:
+		TransparancyEffect(ID3D11Device* pDevice, const std::wstring& assetFile) : Effect(pDevice, assetFile)
+		{
 
-private:
+		}
 
-};
+	};
+
+}

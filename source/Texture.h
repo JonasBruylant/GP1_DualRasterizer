@@ -106,8 +106,8 @@ namespace dae
 		ID3D11ShaderResourceView* GetSRV() { return m_pSRV; }
 
 	private:
-		ID3D11ShaderResourceView* m_pSRV;
-		ID3D11Texture2D* m_pResource;
+		ID3D11ShaderResourceView* m_pSRV{nullptr}; //If something breaks maybe it was this?
+		ID3D11Texture2D* m_pResource{nullptr}; //If something breaks maybe it was this?
 		
 		SDL_Surface* m_pSurface{ nullptr };
 		uint32_t* m_pSurfacePixels{ nullptr };

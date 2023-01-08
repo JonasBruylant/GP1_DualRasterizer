@@ -19,11 +19,9 @@ namespace dae
 	public:
 
 
-		Mesh(ID3D11Device* pDevice, std::vector<Vertex> vertices, std::vector<uint32_t> indices) : m_NumIndices{indices.size()}
+		Mesh(ID3D11Device* pDevice, std::vector<Vertex> vertices, std::vector<uint32_t> indices, Effect* pEffect) : m_NumIndices{indices.size()}
 		{
-			m_pEffect = new Effect(pDevice, L"Resources/MeshShader.fx");
-
-
+			m_pEffect = pEffect;
 
 			//Create Vertex Layout
 			static constexpr uint32_t numElements{ 5 };
@@ -153,7 +151,9 @@ namespace dae
 		Effect* GetEffect() const { return m_pEffect; }
 		Matrix GetWorldMatrix() const { return m_WorldMatrix; }
 		void SetWorldMatrix(Matrix wMatrix) { m_WorldMatrix = wMatrix; }
+
 	private:
+
 		ID3D11InputLayout* m_pInputLayout;
 		ID3D11Buffer* m_pVertexBuffer;
 		ID3D11Buffer* m_pIndexBuffer;

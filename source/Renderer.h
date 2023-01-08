@@ -3,6 +3,8 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Utils.h"
+#include "MeshShaderEffect.h"
+#include "TransparancyEffect.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -50,14 +52,18 @@ namespace dae
 		ID3D11RenderTargetView* m_pRenderTargetView;
 
 		//Objects
-		Mesh* m_pMesh;
+		Mesh* m_pVehicleMesh;
+		Mesh* m_pFireMesh;
 		Camera* m_pCamera;
+
+		
 
 		//Textures
 		Texture* m_pTexture{ nullptr };
 		Texture* m_pNormalTexture{ nullptr };
 		Texture* m_pGlossinessTexture{ nullptr };
 		Texture* m_pSpecularTexture{ nullptr };
+		Texture* m_pFireTexture{ nullptr };
 
 		HRESULT InitializeDirectX();
 		//...

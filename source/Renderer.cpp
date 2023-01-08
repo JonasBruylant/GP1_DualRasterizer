@@ -38,13 +38,18 @@ namespace dae {
 			m_pDeviceContext->Release();
 		}
 
+		//Mesh
+		delete m_pVehicleMesh;
+		m_pVehicleMesh = nullptr;
 
-		delete m_pMesh;
-		m_pMesh = nullptr;
+		delete m_pFireMesh;
+		m_pFireMesh = nullptr;
 
+		//Object
 		delete m_pCamera;
 		m_pCamera = nullptr;
 
+		//Texture
 		delete m_pTexture;
 		m_pTexture = nullptr;
 
@@ -56,6 +61,10 @@ namespace dae {
 
 		delete m_pSpecularTexture;
 		m_pSpecularTexture = nullptr;
+
+		delete m_pFireTexture;
+		m_pFireTexture = nullptr;
+
 
 		m_pRenderTargetView->Release();
 		m_pRenderTargetBuffer->Release();
@@ -71,12 +80,8 @@ namespace dae {
 		m_pCamera->Update(pTimer);
 
 		const float meshRotation{ 45.0f * pTimer->GetElapsed() * TO_RADIANS };
-		m_pMesh->RotateMesh(meshRotation);
-
-		//for (auto& mesh : m_pMeshes)
-		//{
-		//	mesh->RotateMesh(meshRotation);
-		//}
+		m_pVehicleMesh->RotateMesh(meshRotation);
+		m_pFireMesh->RotateMesh(meshRotation);
 	}
 
 
@@ -95,8 +100,9 @@ namespace dae {
 
 		//2. SET PIPELINE + INVOKE DRAWCALLS (=RENDER)
 
-		auto worldViewProjectionMatix = m_pMesh->GetWorldMatrix() * m_pCamera->GetViewMatrix() * m_pCamera->GetProjectionMatrix();
-		m_pMesh->Render(m_pDeviceContext, worldViewProjectionMatix, m_pCamera->GetInvViewMatrix());
+		auto worldViewProjectionMatix = m_pVehicleMesh->GetWorldMatrix() * m_pCamera->GetViewMatrix() * m_pCamera->GetProjectionMatrix();
+		m_pVehicleMesh->Render(m_pDeviceContext, worldViewProjectionMatix, m_pCamera->GetInvViewMatrix());
+		m_pFireMesh->Render(m_pDeviceContext, worldViewProjectionMatix, m_pCamera->GetInvViewMatrix());
 
 		//3. PRESENT BACKBUFFER (SWAP)
 		m_pSwapChain->Present(0, 0);
@@ -106,32 +112,48 @@ namespace dae {
 
 	void Renderer::InitMesh()
 	{
-		//Set up mesh data
+		//Set up mesh data for vehicle
 		std::vector<Vertex> vertices{};
 		
 		std::vector<uint32_t> indices{};
-		
+		MeshShaderEffect* shaderEffect = new MeshShaderEffect(m_pDevice, L"Resources/MeshShader.fx");
 
+		if (m_pTexture)
+			shaderEffect->SetDiffuseMap(m_pTexture);
+
+		if (m_pNormalTexture)
+			shaderEffect->SetNormalMap(m_pNormalTexture);
+
+		if (m_pGlossinessTexture)
+			shaderEffect->SetGlossinessMap(m_pGlossinessTexture);
+
+		if (m_pSpecularTexture)
+			shaderEffect->SetSpecularMap(m_pSpecularTexture);
+		
 		Utils::ParseOBJ("Resources/vehicle.obj", vertices, indices);
-		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+		m_pVehicleMesh = new Mesh(m_pDevice, vertices, indices, shaderEffect);
 		const Vector3 position{ m_pCamera->GetOrigin() + Vector3{0, 0, 50}};
 		const Vector3 rotation{ };
 		const Vector3 scale{ Vector3{ 1, 1, 1 } };
-		//Matrix worldMatrix{position, rotation, scale};
+		Matrix worldMatrix{ Matrix::CreateScale(scale) * Matrix::CreateRotation(rotation) * Matrix::CreateTranslation(position) };
 
-		m_pMesh->SetWorldMatrix(Matrix::CreateScale(scale) * Matrix::CreateRotation(rotation) * Matrix::CreateTranslation(position));
+		m_pVehicleMesh->SetWorldMatrix(worldMatrix);
 
-		if (m_pTexture != nullptr)
-			m_pMesh->GetEffect()->SetDiffuseMap(m_pTexture);
 
-		if (m_pNormalTexture != nullptr)
-			m_pMesh->GetEffect()->SetNormalMap(m_pNormalTexture);
 
-		if (m_pGlossinessTexture != nullptr)
-			m_pMesh->GetEffect()->SetGlossinessMap(m_pGlossinessTexture);
 
-		if (m_pSpecularTexture != nullptr)
-			m_pMesh->GetEffect()->SetSpecularMap(m_pSpecularTexture);
+		//Set up mesh data for Fire
+		std::vector<Vertex> fireVertices{};
+
+		std::vector<uint32_t> fireIndices{};
+		Utils::ParseOBJ("Resources/fireFX.obj", vertices, indices);
+		TransparancyEffect* transparancyEffect = new TransparancyEffect(m_pDevice, L"Resources/Transparancy.fx");
+		m_pFireMesh = new Mesh(m_pDevice, vertices, indices, transparancyEffect);
+
+		if (m_pFireTexture)
+			transparancyEffect->SetDiffuseMap(m_pFireTexture);
+
+		m_pFireMesh->SetWorldMatrix(worldMatrix);
 	}
 
 	void Renderer::InitCamera()
@@ -146,11 +168,13 @@ namespace dae {
 		m_pNormalTexture = Texture::LoadFromFile("Resources/vehicle_normal.png", m_pDevice);
 		m_pGlossinessTexture = Texture::LoadFromFile("Resources/vehicle_gloss.png", m_pDevice);
 		m_pSpecularTexture = Texture::LoadFromFile("Resources/vehicle_specular.png", m_pDevice);
+		m_pFireTexture = Texture::LoadFromFile("Resources/fireFX_diffuse.png", m_pDevice);
 	}
 
 	void Renderer::SwitchTechnique()
 	{
-		m_pMesh->GetEffect()->SwitchCurrentTechnique();
+		m_pVehicleMesh->GetEffect()->SwitchCurrentTechnique();
+		m_pFireMesh->GetEffect()->SwitchCurrentTechnique();
 	}
 
 

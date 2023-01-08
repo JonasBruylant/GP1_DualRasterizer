@@ -18,6 +18,34 @@ float gPi = 3.14159265359f;
 float gLightIntensity = 7.f;
 float gShininess = 25.0f;
 
+//------------------------------------------------
+// Rasterizing
+//------------------------------------------------
+RasterizerState gRasterizerState
+{
+	CullMode = none;
+	FrontCounterClockwise = false;
+};
+
+//------------------------------------------------
+// Blending
+//------------------------------------------------
+BlendState gBlendState
+{
+	BlendEnable[0] = false;
+	RenderTargetWriteMask[0] = 0x0f;
+};
+
+// Depth Stencil
+DepthStencilState gDepthStencilState
+{
+	DepthEnable = true;
+	DepthWriteMask = 1;
+	DepthFunc = less;
+	StencilEnable = false;
+};
+
+
 //Different Sampler states
 SamplerState samPoint
 {
@@ -148,9 +176,12 @@ technique11 AnisotropicTechnique
 {
 	pass P0
 	{
+		SetRasterizerState(gRasterizerState);
+		SetDepthStencilState(gDepthStencilState, 0);
+		SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 		SetVertexShader(CompileShader(vs_5_0, VS()));
 		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_5_0, PSAnisptropic()));
+		SetPixelShader(CompileShader(ps_5_0, PSPoint()));
 	}
 }
 
@@ -158,6 +189,9 @@ technique11 PointTechnique
 {
 	pass P0
 	{
+		SetRasterizerState(gRasterizerState);
+		SetDepthStencilState(gDepthStencilState, 0);
+		SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 		SetVertexShader(CompileShader(vs_5_0, VS()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPoint()));
@@ -168,12 +202,11 @@ technique11 LinearTechnique
 {
 	pass P0
 	{
+		SetRasterizerState(gRasterizerState);
+		SetDepthStencilState(gDepthStencilState, 0);
+		SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 		SetVertexShader(CompileShader(vs_5_0, VS()));
 		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_5_0, PSLinear()));
+		SetPixelShader(CompileShader(ps_5_0, PSPoint()));
 	}
 }
-
-
-
-
