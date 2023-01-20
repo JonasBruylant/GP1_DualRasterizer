@@ -58,9 +58,46 @@ int main(int argc, char* args[])
 			case SDL_KEYUP:
 				//Test for a key
 				//if (e.key.keysym.scancode == SDL_SCANCODE_X)
-				if (e.key.keysym.scancode == SDL_SCANCODE_F2)
-					pRenderer->SwitchTechnique();
-				
+				if (e.key.keysym.scancode == SDL_SCANCODE_F1) //Done
+					pRenderer->ToggleSystemMode();
+				if (e.key.keysym.scancode == SDL_SCANCODE_F2) //Done
+					pRenderer->ToggleRotation();
+				if (e.key.keysym.scancode == SDL_SCANCODE_F3) //Done
+				{
+					if(pRenderer->GetSystemMode() == SystemMode::Hardware)
+						pRenderer->ToggleFireMesh();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F4) //Done
+				{
+					if (pRenderer->GetSystemMode() == SystemMode::Hardware)
+						pRenderer->SwitchTechnique();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F5) //Done
+				{
+					if (pRenderer->GetSystemMode() == SystemMode::Software)
+						pRenderer->SwitchColorMode();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F6) //Done
+				{
+					if (pRenderer->GetSystemMode() == SystemMode::Software)
+						pRenderer->ToggleNormals();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F7) //Done
+				{
+					if (pRenderer->GetSystemMode() == SystemMode::Software)
+						pRenderer->SwitchRenderMode();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F8)
+				{
+					if (pRenderer->GetSystemMode() == SystemMode::Software)
+						pRenderer->ToggleBoundingBoxVisualisation();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F9)
+					pRenderer->ToggleCullFaceMode();
+				if (e.key.keysym.scancode == SDL_SCANCODE_F10) //Done
+					pRenderer->ToggleUniformClearColor();
+				if (e.key.keysym.scancode == SDL_SCANCODE_F11)
+					pRenderer->TogglePrintFPS();
 				break;
 			default: ;
 			}

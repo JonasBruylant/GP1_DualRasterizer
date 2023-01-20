@@ -1,19 +1,11 @@
 #pragma once
 #include "pch.h"
 #include "Effect.h"
+#include "DataTypes.h"
 
 namespace dae
 {
 	//Structs
-	struct Vertex
-	{
-		Vector3 Position;
-		Vector3 Color;
-		Vector2 Uv;
-		Vector3 Normal;
-		Vector3 Tangent;
-	};
-
 	class Mesh
 	{
 	public:
@@ -22,6 +14,8 @@ namespace dae
 		Mesh(ID3D11Device* pDevice, std::vector<Vertex> vertices, std::vector<uint32_t> indices, Effect* pEffect) : m_NumIndices{indices.size()}
 		{
 			m_pEffect = pEffect;
+			m_Vertices = vertices;
+			m_Indices = indices;
 
 			//Create Vertex Layout
 			static constexpr uint32_t numElements{ 5 };
@@ -152,13 +146,28 @@ namespace dae
 		Matrix GetWorldMatrix() const { return m_WorldMatrix; }
 		void SetWorldMatrix(Matrix wMatrix) { m_WorldMatrix = wMatrix; }
 
+		//Software
+		std::vector<Vertex> GetVertices() const { return m_Vertices; }
+		std::vector<uint32_t> GetIndices(){ return m_Indices; }
+		PrimitiveTopology GetTopology() const{return primitiveTopology;}
+		std::vector<Vertex_Out>& GetVerticesOut(){return vertices_out;}
+
 	private:
 
+		//Hardwares
 		ID3D11InputLayout* m_pInputLayout;
 		ID3D11Buffer* m_pVertexBuffer;
 		ID3D11Buffer* m_pIndexBuffer;
 		size_t m_NumIndices;
 		Effect* m_pEffect;
 		Matrix m_WorldMatrix;
+
+
+		//Software
+		std::vector<Vertex> m_Vertices{};
+		std::vector<uint32_t> m_Indices{};
+		PrimitiveTopology primitiveTopology{ PrimitiveTopology::TriangleList };
+
+		std::vector<Vertex_Out> vertices_out{};
 	};
 }

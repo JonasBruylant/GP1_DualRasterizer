@@ -22,6 +22,7 @@ namespace dae
 		Matrix GetProjectionMatrix() { return projectionMatrix; }
 		Vector3 GetOrigin() { return origin; }
 		Matrix GetInvViewMatrix() { return invViewMatrix; }
+		float GetFOV() { return fov; }
 		
 		void CalculateViewMatrix()
 		{
@@ -55,7 +56,7 @@ namespace dae
 
 			//Camera Update Logic
 			//...
-			float movementSpeed{ 20.f };
+			float movementSpeed{ 50.f };
 			float cameraSpeed{ 0.2f };
 
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);

@@ -75,7 +75,7 @@ namespace dae
 					{
 						// OBJ format uses 1-based arrays
 						file >> iPosition;
-						vertex.Position = positions[iPosition - 1];
+						vertex.position = positions[iPosition - 1];
 
 						if ('/' == file.peek())//is next in buffer ==  '/' ?
 						{
@@ -85,7 +85,7 @@ namespace dae
 							{
 								// Optional texture coordinate
 								file >> iTexCoord;
-								vertex.Uv = UVs[iTexCoord - 1];
+								vertex.uv = UVs[iTexCoord - 1];
 							}
 
 							if ('/' == file.peek())
@@ -94,7 +94,7 @@ namespace dae
 
 								// Optional vertex normal
 								file >> iNormal;
-								vertex.Normal = normals[iNormal - 1];
+								vertex.normal = normals[iNormal - 1];
 							}
 						}
 
@@ -126,12 +126,12 @@ namespace dae
 				uint32_t index1 = indices[size_t(i) + 1];
 				uint32_t index2 = indices[size_t(i) + 2];
 
-				const Vector3& p0 = vertices[index0].Position;
-				const Vector3& p1 = vertices[index1].Position;
-				const Vector3& p2 = vertices[index2].Position;
-				const Vector2& uv0 = vertices[index0].Uv;
-				const Vector2& uv1 = vertices[index1].Uv;
-				const Vector2& uv2 = vertices[index2].Uv;
+				const Vector3& p0 = vertices[index0].position;
+				const Vector3& p1 = vertices[index1].position;
+				const Vector3& p2 = vertices[index2].position;
+				const Vector2& uv0 = vertices[index0].uv;
+				const Vector2& uv1 = vertices[index1].uv;
+				const Vector2& uv2 = vertices[index2].uv;
 
 				const Vector3 edge0 = p1 - p0;
 				const Vector3 edge1 = p2 - p0;
@@ -140,27 +140,33 @@ namespace dae
 				float r = 1.f / Vector2::Cross(diffX, diffY);
 
 				Vector3 tangent = (edge0 * diffY.y - edge1 * diffY.x) * r;
-				vertices[index0].Tangent += tangent;
-				vertices[index1].Tangent += tangent;
-				vertices[index2].Tangent += tangent;
+				vertices[index0].tangent += tangent;
+				vertices[index1].tangent += tangent;
+				vertices[index2].tangent += tangent;
 			}
 
 			//Create the Tangents (reject)
 			for (auto& v : vertices)
 			{
-				v.Tangent = Vector3::Reject(v.Tangent, v.Normal).Normalized();
+				v.tangent = Vector3::Reject(v.tangent, v.normal).Normalized();
 
 				if(flipAxisAndWinding)
 				{
-					v.Position.z *= -1.f;
-					v.Normal.z *= -1.f;
-					v.Tangent.z *= -1.f;
+					v.position.z *= -1.f;
+					v.normal.z *= -1.f;
+					v.tangent.z *= -1.f;
 				}
 
 			}
 
 			return true;
 		}
+
 #pragma warning(pop)
+		static float Remap(float depthValue, float min, float max)
+		{
+			const float clamped{ std::clamp(depthValue, min, max) };
+			return (clamped - min) / (max - min);
+		}
 	}
 }

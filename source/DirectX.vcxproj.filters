@@ -11,6 +11,9 @@
     <Filter Include="Effect">
       <UniqueIdentifier>{0b0d9988-d006-41c9-aa37-dfc7a745b1e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DataType">
+      <UniqueIdentifier>{e4f87137-413b-4dd7-865d-c50912d79856}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h" />
@@ -55,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="DataTypes.h">
+      <Filter>DataType</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
