@@ -58,13 +58,19 @@ namespace dae
 			//...
 			float movementSpeed{ 50.f };
 			float cameraSpeed{ 0.2f };
-
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
+
+			if ((pKeyboardState[SDL_SCANCODE_LSHIFT]) || (pKeyboardState[SDL_SCANCODE_RSHIFT]))
+				movementSpeed = 100.f;
+			else
+				movementSpeed = 50.f;
+
 			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_W] | pKeyboardState[SDL_SCANCODE_UP])) * forward * deltaTime * movementSpeed;
 			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_S] | pKeyboardState[SDL_SCANCODE_DOWN])) * -forward * deltaTime * movementSpeed;
 
 			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_A] | pKeyboardState[SDL_SCANCODE_LEFT])) * -right * deltaTime * movementSpeed;
 			origin += static_cast<float>((pKeyboardState[SDL_SCANCODE_D] | pKeyboardState[SDL_SCANCODE_RIGHT])) * right * deltaTime * movementSpeed;
+
 
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
@@ -82,8 +88,9 @@ namespace dae
 				origin += forward * static_cast<float>(mouseY) * deltaTime * movementSpeed;
 
 				totalYaw += mouseX * cameraSpeed;
-				Matrix rotation = Matrix::CreateRotation(totalPitch * TO_RADIANS, 0, 0);
+				Matrix rotation = Matrix::CreateRotation(0, totalYaw * TO_RADIANS, 0);
 				forward = rotation.TransformVector(Vector3::UnitZ);
+				
 				forward.Normalize();
 				break;
 			}

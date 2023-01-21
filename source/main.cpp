@@ -28,7 +28,7 @@ int main(int argc, char* args[])
 	const uint32_t height = 480;
 
 	SDL_Window* pWindow = SDL_CreateWindow(
-		"DirectX - ***Insert Name/Class***",
+		"DirectX - ***Jonas Bruylant - 2DAE15***",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height, 0);
@@ -89,15 +89,17 @@ int main(int argc, char* args[])
 				}
 				if (e.key.keysym.scancode == SDL_SCANCODE_F8)
 				{
-					if (pRenderer->GetSystemMode() == SystemMode::Software)
+					if (pRenderer->GetSystemMode() == SystemMode::Software) //Done
 						pRenderer->ToggleBoundingBoxVisualisation();
 				}
 				if (e.key.keysym.scancode == SDL_SCANCODE_F9)
 					pRenderer->ToggleCullFaceMode();
 				if (e.key.keysym.scancode == SDL_SCANCODE_F10) //Done
 					pRenderer->ToggleUniformClearColor();
-				if (e.key.keysym.scancode == SDL_SCANCODE_F11)
-					pRenderer->TogglePrintFPS();
+				if (e.key.keysym.scancode == SDL_SCANCODE_F11) //Done
+				{
+					pTimer->ToggleShowFPS();
+				}
 				break;
 			default: ;
 			}
@@ -111,11 +113,14 @@ int main(int argc, char* args[])
 
 		//--------- Timer ---------
 		pTimer->Update();
-		printTimer += pTimer->GetElapsed();
-		if (printTimer >= 1.f)
+		if (pTimer->GetShowFPS())
 		{
-			printTimer = 0.f;
-			std::cout << "dFPS: " << pTimer->GetdFPS() << std::endl;
+			printTimer += pTimer->GetElapsed();
+			if (printTimer >= 1.f)
+			{
+				printTimer = 0.f;
+				std::cout << "dFPS: " << pTimer->GetdFPS() << std::endl;
+			}
 		}
 	}
 	pTimer->Stop();

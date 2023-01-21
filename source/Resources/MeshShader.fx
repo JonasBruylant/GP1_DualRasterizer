@@ -12,6 +12,7 @@ Texture2D gGlossinessMap : GlossinessMap;
 
 //Light
 float3 gLightdirection = normalize(float3(0.577f, -0.577f, 0.577f));
+float4 gAmbient = float4(.025f, .025f, .025f, 1.f);
 
 //Extra Data
 float gPi = 3.14159265359f;
@@ -153,7 +154,7 @@ float4 Sampler(VS_OUTPUT input, SamplerState sampleVar)
 
 	const float4 specular = gSpecularMap.Sample(sampleVar,input.TexCoord) * Phong(1.0f, phongExponent, -gLightdirection, viewDirection, pixelNormal);
 
-	return (gLightIntensity * lambert + specular) * observedArea;
+	return (gLightIntensity * lambert + specular) * observedArea + gAmbient;
 
 }
 

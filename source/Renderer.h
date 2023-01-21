@@ -39,6 +39,15 @@ namespace dae
 		END
 	};
 
+	enum class CullFaceMode
+	{
+		Front,
+		Back,
+		None,
+
+		END
+	};
+
 	
 	class Renderer final
 	{
@@ -72,7 +81,6 @@ namespace dae
 		void ToggleSystemMode();
 		void ToggleCullFaceMode();
 		void ToggleUniformClearColor();
-		void TogglePrintFPS();
 		void ToggleFireMesh();
 		void ToggleBoundingBoxVisualisation();
 
@@ -91,7 +99,7 @@ namespace dae
 		bool m_UseNormals{ true };
 		bool m_ShowFireMesh{ true };
 		bool m_IsClearColorToggled{ false };
-
+		bool m_ShowBoundingBox{ false };
 		//DIRECTX
 		ID3D11Device* m_pDevice;
 		ID3D11DeviceContext* m_pDeviceContext;
@@ -100,6 +108,7 @@ namespace dae
 		ID3D11DepthStencilView* m_pDepthStencilView;
 		ID3D11Resource* m_pRenderTargetBuffer;
 		ID3D11RenderTargetView* m_pRenderTargetView;
+		ID3D11RasterizerState* m_pRasterizerState;
 
 		//Objects
 		Mesh* m_pVehicleMesh;
@@ -110,6 +119,7 @@ namespace dae
 		RenderMode m_CurrentRenderMode;
 		ColorMode m_CurrentColorMode;
 		SystemMode m_CurrentSystemMode;
+		CullFaceMode m_CurrentCullMode;
 
 		//Textures
 		Texture* m_pTexture{ nullptr };

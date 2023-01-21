@@ -30,6 +30,9 @@ namespace dae {
 
 		m_pDepthBufferPixels = new float[m_Width * m_Height];
 		m_CurrentSystemMode = SystemMode::Software;
+		m_CurrentRenderMode = RenderMode::Texture;
+		m_CurrentColorMode = ColorMode::observedArea;
+		m_CurrentCullMode = CullFaceMode::None;
 
 		InitCamera();
 		InitTexture();
@@ -140,7 +143,7 @@ namespace dae {
 
 	void Renderer::InitCamera()
 	{
-		m_pCamera = new Camera({ 0.f, 0.f, -10.f }, m_AspectRatio, 45.f);
+		m_pCamera = new Camera({ 0.f, 0.f, 0.f }, m_AspectRatio, 45.f);
 		m_pCamera->CalculateProjectionMatrix();
 	}
 	void Renderer::InitTexture()
@@ -206,41 +209,130 @@ namespace dae {
 	void Renderer::SwitchRenderMode()
 	{
 		m_CurrentRenderMode = static_cast<RenderMode>((static_cast<int>(m_CurrentRenderMode) + 1) % (static_cast<int>(RenderMode::END)));
+		switch (m_CurrentRenderMode)
+		{
+		case RenderMode::Texture:
+			std::cout << "Current Rendermode: Texture \n";
+			break;
+		case RenderMode::DepthBuffer:
+			std::cout << "Current Rendermode: Depthbuffer \n";
+			break;
+		}
 	}
 	void Renderer::SwitchColorMode()
 	{
 		m_CurrentColorMode = static_cast<ColorMode>((static_cast<int>(m_CurrentColorMode) + 1) % (static_cast<int>(ColorMode::END) ));
+		switch (m_CurrentColorMode)
+		{
+		case dae::ColorMode::observedArea:
+			std::cout << "Current Colormode: ObservedArea.\n";
+			break;
+		case dae::ColorMode::Diffuse:
+			std::cout << "Current Rendermode: Diffuse \n";
+			break;
+		case dae::ColorMode::Specular:
+			std::cout << "Current Rendermode: Specular \n";
+			break;
+		case dae::ColorMode::Combined:
+			std::cout << "Current Rendermode: Combined \n";
+			break;
+		}
 	}
 
 	void Renderer::ToggleNormals()
 	{
 		m_UseNormals = !m_UseNormals;
+
+		if (m_UseNormals)
+			std::cout << "Normals on \n";
+		else
+			std::cout << "Normals off \n";
 	}
 	void Renderer::ToggleRotation()
 	{
 		m_IsRotating = !m_IsRotating;
+		if (m_IsRotating)
+			std::cout << "Rotating \n";
+		else
+			std::cout << "Not Rotating \n";
 	}
 	void Renderer::ToggleSystemMode()
 	{
 		m_CurrentSystemMode = static_cast<SystemMode>((static_cast<int>(m_CurrentSystemMode) + 1) % (static_cast<int>(SystemMode::END)));
+
+		switch (m_CurrentSystemMode)
+		{
+		case dae::SystemMode::Hardware:
+			std::cout << "Hardware rendering \n";
+			break;
+		case dae::SystemMode::Software:
+			std::cout << "Software rendering \n";
+			break;
+
+		}
 	}
 	void Renderer::ToggleCullFaceMode()
 	{
+		m_CurrentCullMode = static_cast<CullFaceMode>((static_cast<int>(m_CurrentCullMode) + 1) % (static_cast<int>(CullFaceMode::END)));
+		D3D11_RASTERIZER_DESC rasterizerDesc;
+		rasterizerDesc.AntialiasedLineEnable = false;
+		rasterizerDesc.MultisampleEnable = false;
+		rasterizerDesc.ScissorEnable = false;
+		rasterizerDesc.DepthClipEnable = true;
+		rasterizerDesc.DepthBiasClamp = 0.f;
+		rasterizerDesc.SlopeScaledDepthBias = 0.f;
+		rasterizerDesc.DepthBias = 0;
+		rasterizerDesc.FrontCounterClockwise = false;
+		rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 
+
+		switch (m_CurrentCullMode)
+		{
+		case dae::CullFaceMode::Front:
+			std::cout << "Front face culling\n";
+			rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
+			break;
+		case dae::CullFaceMode::Back:
+			std::cout << "Back face culling\n";
+			rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+			break;
+		case dae::CullFaceMode::None:
+			std::cout << "No culling\n";
+			rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+			break;
+		}
+		
+		if (m_pRasterizerState)
+			m_pRasterizerState->Release();
+
+		m_pDevice->CreateRasterizerState(&rasterizerDesc, &m_pRasterizerState);
+
+		m_pVehicleMesh->GetEffect()->SetRasterizerState(m_pRasterizerState);
 	}
 	void Renderer::ToggleUniformClearColor()
 	{
 		m_IsClearColorToggled = !m_IsClearColorToggled;
-	}
-	void Renderer::TogglePrintFPS()
-	{
+		if (m_IsClearColorToggled)
+			std::cout << "Uniform Color On \n";
+		else
+			std::cout << "Uniform Color Off \n";
 	}
 	void Renderer::ToggleFireMesh()
 	{
 		m_ShowFireMesh = !m_ShowFireMesh;
+		if (m_ShowFireMesh)
+			std::cout << "Fire Mesh Shown \n";
+		else
+			std::cout << "Fire Mesh Hidden \n";
 	}
 	void Renderer::ToggleBoundingBoxVisualisation()
 	{
+		m_ShowBoundingBox = !m_ShowBoundingBox;
+
+		if (m_ShowBoundingBox)
+			std::cout << "Bounding box shown \n";
+		else
+			std::cout << "Bounding box hidden \n";
 	}
 
 
@@ -255,9 +347,9 @@ namespace dae {
 		SDL_LockSurface(m_pBackBuffer);
 		std::fill_n(m_pDepthBufferPixels, m_Width * m_Height, FLT_MAX);
 
-		Uint32 clearColor{ 100 };
+		Uint32 clearColor{ static_cast<Uint32>(0.39f * 255)};
 		if (m_IsClearColorToggled)
-			clearColor = 3;
+			clearColor = static_cast<Uint32>(0.1f * 255);
 		SDL_FillRect(m_pBackBuffer, NULL, SDL_MapRGB(m_pBackBuffer->format, clearColor, clearColor, clearColor));
 
 		std::vector<Vector2> raster_Vertices;
@@ -373,12 +465,37 @@ namespace dae {
 
 
 				Vector2 currentPixel{ static_cast<float>(px), static_cast<float>(py) };
+				
+				if (m_ShowBoundingBox)
+				{
+					m_pBackBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBackBuffer->format,
+						static_cast<uint8_t>(255),
+						static_cast<uint8_t>(255),
+						static_cast<uint8_t>(255));
+					continue;
+				}
+
 				float currPixMin0Crossv0 = Vector2::Cross(e0, currentPixel - p0);
 				float currPixMin1Crossv1 = Vector2::Cross(e1, currentPixel - p1);
 				float currPixMin2Crossv2 = Vector2::Cross(e2, currentPixel - p2);
 
-				if (!(currPixMin0Crossv0 > 0 && currPixMin1Crossv1 > 0 && currPixMin2Crossv2 > 0))
-					continue;
+				switch (m_CurrentCullMode)
+				{
+				case dae::CullFaceMode::Front:
+					if (!(currPixMin0Crossv0 < 0 && currPixMin1Crossv1 < 0 && currPixMin2Crossv2 < 0))
+						continue;
+					break;
+				case dae::CullFaceMode::Back:
+					if (!(currPixMin0Crossv0 > 0 && currPixMin1Crossv1 > 0 && currPixMin2Crossv2 > 0))
+						continue;
+					break;
+				case dae::CullFaceMode::None:
+					if (!(currPixMin0Crossv0 > 0 && currPixMin1Crossv1 > 0 && currPixMin2Crossv2 > 0) && !(currPixMin0Crossv0 < 0 && currPixMin1Crossv1 < 0 && currPixMin2Crossv2 < 0))
+						continue;
+					break;
+				}
+
+
 
 				float weight0 = currPixMin1Crossv1 / triangleArea;
 				float weight1 = currPixMin2Crossv2 / triangleArea;
@@ -518,7 +635,7 @@ namespace dae {
 		ColorRGB finalColor{ };
 		float lightIntensity{ 7.f };
 		float glossiness{ 25.f };
-		Vector3 ambient{ .025f, .025f, .025f };
+		ColorRGB ambient{ .025f, .025f, .025f };
 		float observedArea = std::max(Vector3::Dot(-lightDirection, pixelNormal), 0.f);
 
 
@@ -554,7 +671,7 @@ namespace dae {
 			
 			const ColorRGB specular{ m_pSpecularTexture->Sample(vertex_out.uv) * Phong(1.0f, phongExponent, -lightDirection, vertex_out.viewDirection, pixelNormal) };
 			
-			return (lightIntensity * lambert + specular) * observedArea;
+			return (lightIntensity * lambert + specular) * observedArea + ambient;
 			break;
 		}
 		default:

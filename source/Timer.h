@@ -26,6 +26,15 @@ namespace dae
 		float GetElapsed() const { return m_ElapsedTime; };
 		float GetTotal() const { return m_TotalTime; };
 		bool IsRunning() const { return !m_IsStopped; };
+		bool GetShowFPS() const { return m_ShowFPS; }
+
+		void ToggleShowFPS() {
+			m_ShowFPS = !m_ShowFPS;
+			if (m_ShowFPS)
+				std::cout << "Showing FPS \n";
+			else
+				std::cout << "Hiding FPS \n";
+		}
 
 	private:
 		uint64_t m_BaseTime = 0;
@@ -46,5 +55,6 @@ namespace dae
 
 		bool m_IsStopped = true;
 		bool m_ForceElapsedUpperBound = false;
+		bool m_ShowFPS = false;
 	};
 }

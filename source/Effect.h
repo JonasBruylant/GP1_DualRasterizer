@@ -47,6 +47,10 @@ namespace dae
 			m_pDiffuseMapVariable = m_pEffect->GetVariableByName("gDiffuseMap")->AsShaderResource();
 			if (!m_pDiffuseMapVariable->IsValid())
 				std::wcout << L"m_pDiffuseMapVariable is not valid \n";
+
+
+			//Set rasterizer variable
+			m_pRasterizerVariable = m_pEffect->GetVariableByName("gRasterizerState")->AsRasterizer();
 		}
 		virtual ~Effect() 
 		{
@@ -86,6 +90,8 @@ namespace dae
 				return m_pLinearTechnique;
 			case dae::Effect::currentTechnique::Anisotropic:
 				return m_pAnisotropicTechnique;
+			default:
+				return m_pPointTechnique;
 			}
 		}
 
@@ -112,7 +118,7 @@ namespace dae
 		void SetWorldMatrixData(Matrix worldMatrix) { if(m_pWorldMatrixVariable) m_pWorldMatrixVariable->SetMatrix(reinterpret_cast<const float*>(&worldMatrix)); }
 		void SetInvViewMatrixData(Matrix invViewMatrix) { if (m_pInvViewMatrixVariable) m_pInvViewMatrixVariable->SetMatrix(reinterpret_cast<const float*>(&invViewMatrix)); }
 		void SetDiffuseMap(Texture* pDiffuseTexture) { if (m_pDiffuseMapVariable) m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetSRV()); }
-
+		void SetRasterizerState(ID3D11RasterizerState* pRasterizerState) { if (m_pRasterizerVariable) m_pRasterizerVariable->SetRasterizerState(0, pRasterizerState); }
 
 		static ID3DX11Effect* LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile)
 		{
@@ -176,6 +182,7 @@ namespace dae
 		ID3DX11EffectMatrixVariable* m_pInvViewMatrixVariable{nullptr};
 
 		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVariable;
+		ID3DX11EffectRasterizerVariable* m_pRasterizerVariable;
 	};
 }
 
